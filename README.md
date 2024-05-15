@@ -33,3 +33,7 @@ I hope this application will help you and you will be able to continue using Arc
 
 Надеюсь, что данное приложение вам поможет и вы сможете как и я дальше пользоваться Arc Browser без каких-либо проблем)
 </details>
+
+<p align="right">
+	<img src="https://badges.pufler.dev/visits/KataLoved/ArcBrowserStarter?color=black&logo=github"/>
+</p>
