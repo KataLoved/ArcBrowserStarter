@@ -19,7 +19,7 @@ I hope this application will help you and you will be able to continue using Arc
 
 ### RU:
 <details>
-Данное приложение исправление проблему, когда Arc Browser не запускается после авторизации.<br><br>
+Данное приложение исправляет проблему, когда Arc Browser не запускается после авторизации.<br><br>
 
 Последовательность проблемы:
 1. Установка приложения.
