@@ -18,6 +18,7 @@ public class Core
         if (path == string.Empty)
         {
             Console.WriteLine("Arc Browser is working fine.");
+            Thread.Sleep(2000);
             Console.WriteLine("Trying to run Arc Browser...");
             RunArcBrowser();
             return;
@@ -74,10 +75,9 @@ public class Core
     private static string GetProblemBrowserFolderPath()
     {
         var user = Environment.UserName;
-        var path = $@"C:\Users\{user}\AppData\Local\Packages\TheBrowserCompany.Arc_{ArcBrowserMaybeId}\LocalCache\Local\firestore\Arc";
+        var path = $@"C:\Users\{user}\AppData\Local\Packages\TheBrowserCompany.Arc_ttt1ap7aakyb4\LocalCache\Local\firestore\Arc";
         return Directory.Exists(path) ? path : string.Empty;
     }
 
-    private const string ArcBrowserMaybeId = "ttt1ap7aakyb4";
-    private const string ArcBrowserPath = $@"C:\Program Files\WindowsApps\TheBrowserCompany.Arc_1.1.1.27314_x64__{ArcBrowserMaybeId}\Arc.exe";
+    private const string ArcBrowserPath = $@"C:\Program Files\WindowsApps\TheBrowserCompany.Arc_1.3.2.30214_x64__ttt1ap7aakyb4\Arc.exe";
 }
