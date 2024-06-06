@@ -185,6 +185,6 @@ public class Bootstrapper
         }
     }
 
-    private const string Version = "0.0.1";
+    private const string Version = "0.0.3";
     private const string ProgramName = "ArcBrowserStarter";
 }

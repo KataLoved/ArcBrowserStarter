@@ -35,14 +35,14 @@ I hope this application will help you and you will be able to continue using Arc
 </details>
 
 > **How to use:**
-1. Download the archive from the [Releases](https://github.com/KataLoved/ArcBrowserStarter/releases) page.<br>
+1. Download the archive from the [Releases](https://github.com/KataLoved/ArcBrowserStarter/releases) page (Download the latest version).<br>
 2. Copy the `ArcBrowserStarter` folder to any location on your computer.<br>
 3. Run `ArcBrowserStarter.exe`.
 4. Enjoy Arc Browser.
 - - - - - -
 
 > **Как использовать:**
-1. Скачайте архив с приложением с [Releases](https://github.com/KataLoved/ArcBrowserStarter/releases) page.<br>
+1. Скачайте архив с приложением со страницы [Релизов](https://github.com/KataLoved/ArcBrowserStarter/releases) (Скачивайте последнюю версию).<br>
 2. Скопируйте папку `ArcBrowserStarter` в любое место на вашем компьютере.<br>
 3. Запустите `ArcBrowserStarter.exe`.
 4. Наслаждайтесь Arc Browser.
