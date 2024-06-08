@@ -27,7 +27,6 @@ public class Bootstrapper
         }
         Console.WriteLine($"> Executable Path: {paths["executablePath"]}");
         Console.ResetColor();
-
         
         // > - - - - - - - - - - - - - Debug - - - - - - - - - - - - - <
         // while (true)
@@ -102,13 +101,19 @@ public class Bootstrapper
         Console.WriteLine($"New version available: {latestVersion}. Current version: {Version}");
         Console.WriteLine("Correct operation of the program is not guaranteed.");
         Console.WriteLine($"You can download it from: {latestRelease.HtmlUrl}");
+        Console.WriteLine("Press enter if you want to continue...");
         Console.ResetColor();
+        
+        var pressedKey = Console.ReadKey().Key;
+        if (pressedKey != ConsoleKey.Enter) Environment.Exit(0);
     }
 
     private static Dictionary<string, string> GetArcBrowserFolderPaths()
     {
-        const string packagesPath = @"C:\Users\Baka\AppData\Local\Packages";
         const string windowsAppsPath = @"C:\Program Files\WindowsApps";
+
+        var username = Environment.UserName;
+        var packagesPath = $@"C:\Users\{username}\AppData\Local\Packages";
 
         var paths = new Dictionary<string, string>();
         var packages = Directory.GetDirectories(packagesPath);
@@ -185,6 +190,6 @@ public class Bootstrapper
         }
     }
 
-    private const string Version = "0.0.3a";
+    private const string Version = "0.0.3b";
     private const string ProgramName = "ArcBrowserStarter";
 }
