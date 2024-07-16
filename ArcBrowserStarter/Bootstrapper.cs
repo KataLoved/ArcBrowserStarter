@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Diagnostics;
+using System.Management;
 using System.Threading;
 using System.Linq;
 using System.IO;
@@ -27,21 +29,7 @@ public class Bootstrapper
         }
         Console.WriteLine($"> Executable Path: {paths["executablePath"]}");
         Console.ResetColor();
-        
-        // > - - - - - - - - - - - - - Debug - - - - - - - - - - - - - <
-        // while (true)
-        // {
-        //     Console.Write("Do you want to fix Arc Browser? (Y/N): ");
-        //     var pressedKey = Console.ReadKey().Key;
-        //     if (pressedKey == ConsoleKey.Y)
-        //     {
-        //         Console.Write("\n");
-        //         break;
-        //     }
-        //     if (pressedKey == ConsoleKey.N) Environment.Exit(0);
-        // }
-        // > - - - - - - - - - - - - - Debug - - - - - - - - - - - - - <
-        
+
         if (paths.Count == 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -68,9 +56,12 @@ public class Bootstrapper
         
         Console.WriteLine("Trying to run Arc Browser...");
         Thread.Sleep(1000);
+        CloseRequirementsWatcher();
+        
         var executableStatus = RunArcBrowser(paths["executablePath"]);
         if (!executableStatus)
         {
+            _arcStartWatcher.Stop();
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Failed to run Arc Browser.");
             Console.ResetColor();
@@ -83,8 +74,18 @@ public class Bootstrapper
         Console.WriteLine("Arc Browser is running.");
         Console.ResetColor();
         
-        Thread.Sleep(2000);
-        Environment.Exit(0);
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(TimeSpan.FromSeconds(5));
+
+        try
+        {
+            await Task.Delay(-1, cts.Token);
+        }
+        catch (TaskCanceledException)
+        {
+            _arcStartWatcher.Stop();
+            Environment.Exit(0);
+        }
     }
 
     private static async Task CheckForNewRelease()
@@ -189,7 +190,39 @@ public class Bootstrapper
             return false;
         }
     }
+    
+    private static void CloseRequirementsWatcher()
+    {
+        var wqlStartQuery = new WqlEventQuery("SELECT * FROM Win32_ProcessStartTrace WHERE ProcessName = \"Arc.exe\"");
+        _arcStartWatcher = new ManagementEventWatcher(wqlStartQuery);
 
-    private const string Version = "0.0.3b";
+        _arcStartWatcher.EventArrived += startWatch_EventArrived;
+        _arcStartWatcher.Start();
+    }
+
+    private static void startWatch_EventArrived(object sender, EventArrivedEventArgs e)
+    {
+        var processId = Convert.ToInt32(e.NewEvent.Properties["ProcessID"].Value);
+        var process = Process.GetProcessById(processId);
+        var processName = process.ProcessName;
+        
+        if (processName != "Arc") return;
+        
+        var processTitle = process.MainWindowTitle;
+        if (processTitle.Contains("Processor requirements not met"))
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Detect \"Processor requirements not met\" message. Closing this message.");
+            Console.ResetColor();
+            Thread.Sleep(500);
+            SendKeys.SendWait("{ENTER}");
+        }
+        
+        _arcStartWatcher.Stop();
+        Environment.Exit(0);
+    }
+
+    private const string Version = "1.0.0";
     private const string ProgramName = "ArcBrowserStarter";
+    private static ManagementEventWatcher _arcStartWatcher;
 }
