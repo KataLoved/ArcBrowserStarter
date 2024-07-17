@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Globalization;
 using System.Diagnostics;
 using System.Management;
 using System.Threading;
@@ -16,6 +17,9 @@ public class Bootstrapper
     public async Task Initialize()
     {
         await CheckForNewRelease();
+        
+        var systemLanguage = CultureInfo.InstalledUICulture.TwoLetterISOLanguageName;
+        _language = LoadLanguage(systemLanguage);
         
         var paths = GetArcBrowserFolderPaths();
         
@@ -33,12 +37,15 @@ public class Bootstrapper
         if (paths.Count == 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Arc Browser not found.");
+            Console.WriteLine(_language["ArcBrowserNotFound"]
+                ?? "Arc Browser not found.");
             Console.ResetColor();
-            Console.WriteLine("Press enter to exit...");
+            Console.WriteLine(_language["PressAnyKeyToExit"]
+                ?? "Press enter to exit...");
             Console.ReadLine();
             Environment.Exit(0);
         }
+
 
         if (paths.ContainsKey("problemPath"))
         {
@@ -46,15 +53,18 @@ public class Bootstrapper
             if (!fixStatus)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("Failed to fix Arc Browser.");
+                Console.WriteLine(_language["FailedToFixArcBrowser"]
+                    ?? "Failed to fix Arc Browser.");
                 Console.ResetColor();
-                Console.WriteLine("Press enter to exit...");
+                Console.WriteLine(_language["PressAnyKeyToExit"]
+                    ?? "Press enter to exit...");
                 Console.ReadLine();
                 Environment.Exit(0);
             }
         }
         
-        Console.WriteLine("Trying to run Arc Browser...");
+        Console.WriteLine(_language["TryingToRunArcBrowser"]
+            ?? "Trying to run Arc Browser...");
         Thread.Sleep(1000);
         CloseRequirementsWatcher();
         
@@ -63,15 +73,18 @@ public class Bootstrapper
         {
             _arcStartWatcher.Stop();
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Failed to run Arc Browser.");
+            Console.WriteLine(_language["FailedToRunArcBrowser"]
+                ?? "Failed to run Arc Browser.");
             Console.ResetColor();
-            Console.WriteLine("Press enter to exit...");
+            Console.WriteLine(_language["PressAnyKeyToExit"]
+                ?? "Press enter to exit...");
             Console.ReadLine();
             Environment.Exit(0);
         }
         
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine("Arc Browser is running.");
+        Console.WriteLine(_language["ArcBrowserIsRunning"]
+            ?? "Arc Browser is running.");
         Console.ResetColor();
         
         var cts = new CancellationTokenSource();
@@ -99,14 +112,40 @@ public class Bootstrapper
         if (latestVersion == Version) return;
         
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine($"New version available: {latestVersion}. Current version: {Version}");
-        Console.WriteLine("Correct operation of the program is not guaranteed.");
-        Console.WriteLine($"You can download it from: {latestRelease.HtmlUrl}");
-        Console.WriteLine("Press enter if you want to continue...");
+        var lines = new[]
+        {
+            _language["NewVersionAvailable1"]?.Replace("{{LATEST_VERSION}}", latestVersion).Replace("{{VERSION}}", Version)
+                ?? $"New version available: {latestVersion}. Current version: {Version}",
+            _language["NewVersionAvailable2"]
+                ?? "Correct operation of the program is not guaranteed.",
+            _language["NewVersionAvailable3"]?.Replace("{{URL}}", latestRelease.HtmlUrl)
+                ?? $"You can download it from: {latestRelease.HtmlUrl}",
+            _language["NewVersionAvailable4"]
+                ?? "Press enter if you want to continue..."
+        };
+        
+        foreach (var line in lines) Console.WriteLine(line);
         Console.ResetColor();
         
         var pressedKey = Console.ReadKey().Key;
         if (pressedKey != ConsoleKey.Enter) Environment.Exit(0);
+    }
+    
+    private static Dictionary<string, string> LoadLanguage(string languageKey)
+    {
+        var languagePath = $@"languages\{languageKey}.ini";
+        var language = new Dictionary<string, string>();
+        if (!File.Exists(languagePath)) return language;
+        
+        var lines = File.ReadAllLines(languagePath);
+        return lines
+            .Select(line => line.Split('='))
+            .Where(parts => parts.Length == 2)
+            .Aggregate(language, (current, parts) =>
+            {
+                current.Add(parts[0], parts[1]);
+                return current;
+            });
     }
 
     private static Dictionary<string, string> GetArcBrowserFolderPaths()
@@ -210,7 +249,7 @@ public class Bootstrapper
         var processTitle = process.MainWindowTitle;
         if (processTitle.Contains("Processor requirements not met"))
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(700);
             SendKeys.SendWait("{ENTER}");
         }
         
@@ -218,7 +257,8 @@ public class Bootstrapper
         Environment.Exit(0);
     }
 
-    private const string Version = "1.0.0a";
+    private const string Version = "1.0.2";
+    private static Dictionary<string, string> _language;
     private const string ProgramName = "ArcBrowserStarter";
     private static ManagementEventWatcher _arcStartWatcher;
 }

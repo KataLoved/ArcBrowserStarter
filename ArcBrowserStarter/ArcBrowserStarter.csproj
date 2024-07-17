@@ -76,9 +76,22 @@
     <ItemGroup>
       <None Include="packages.config" />
     </ItemGroup>
+    <ItemGroup>
+      <Content Include="languages\en.ini" />
+      <Content Include="languages\ru.ini" />
+    </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 
     <Target Name="BeforeBuild">
         <Message Text="Building $(MSBuildProjectFullPath)" Importance="high" />
+    </Target>
+    
+    
+    <Target Name="CopyFiles" AfterTargets="Build">
+        <ItemGroup>
+            <LanguageFiles Include="languages\**\*.*" />
+        </ItemGroup>
+        <Copy SourceFiles="@(LanguageFiles)" DestinationFolder="$(OutputPath)\languages\%(RecursiveDir)" />
+        <Message Text="Copying files to $(OutputPath)" Importance="high" />
     </Target>
 </Project>
