@@ -27,9 +27,9 @@ public class Bootstrapper
         {
             Console.WriteLine($"> Problem Path: {paths["problemPath"]}");
         }
+        
         Console.WriteLine($"> Executable Path: {paths["executablePath"]}");
         Console.ResetColor();
-
         if (paths.Count == 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
@@ -150,12 +150,11 @@ public class Bootstrapper
         var version = latest.Version;
         
         var problemPath = arcPackagePaths.FirstOrDefault(p => p.PackageId == packageId)?.Path;
-        
         paths.Add("version", version);
         paths.Add("packageId", packageId);
         paths.Add("executablePath", latest.Path);
+
         if (Directory.Exists(problemPath)) paths.Add("problemPath", problemPath);
-        
         return paths;
     }
     
@@ -211,10 +210,7 @@ public class Bootstrapper
         var processTitle = process.MainWindowTitle;
         if (processTitle.Contains("Processor requirements not met"))
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Detect \"Processor requirements not met\" message. Closing this message.");
-            Console.ResetColor();
-            Thread.Sleep(500);
+            Thread.Sleep(1000);
             SendKeys.SendWait("{ENTER}");
         }
         
@@ -222,7 +218,7 @@ public class Bootstrapper
         Environment.Exit(0);
     }
 
-    private const string Version = "1.0.0";
+    private const string Version = "1.0.0a";
     private const string ProgramName = "ArcBrowserStarter";
     private static ManagementEventWatcher _arcStartWatcher;
 }
