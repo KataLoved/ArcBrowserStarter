@@ -37,11 +37,9 @@ public class Bootstrapper
         if (paths.Count == 0)
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(_language["ArcBrowserNotFound"]
-                ?? "Arc Browser not found.");
+            Console.WriteLine(_language["ArcBrowserNotFound"]);
             Console.ResetColor();
-            Console.WriteLine(_language["PressAnyKeyToExit"]
-                ?? "Press enter to exit...");
+            Console.WriteLine(_language["PressAnyKeyToExit"]);
             Console.ReadLine();
             Environment.Exit(0);
         }
@@ -53,18 +51,15 @@ public class Bootstrapper
             if (!fixStatus)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine(_language["FailedToFixArcBrowser"]
-                    ?? "Failed to fix Arc Browser.");
+                Console.WriteLine(_language["FailedToFixArcBrowser"]);
                 Console.ResetColor();
-                Console.WriteLine(_language["PressAnyKeyToExit"]
-                    ?? "Press enter to exit...");
+                Console.WriteLine(_language["PressAnyKeyToExit"]);
                 Console.ReadLine();
                 Environment.Exit(0);
             }
         }
         
-        Console.WriteLine(_language["TryingToRunArcBrowser"]
-            ?? "Trying to run Arc Browser...");
+        Console.WriteLine(_language["TryingToRunArcBrowser"]);
         Thread.Sleep(1000);
         CloseRequirementsWatcher();
         
@@ -73,18 +68,15 @@ public class Bootstrapper
         {
             _arcStartWatcher.Stop();
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(_language["FailedToRunArcBrowser"]
-                ?? "Failed to run Arc Browser.");
+            Console.WriteLine(_language["FailedToRunArcBrowser"]);
             Console.ResetColor();
-            Console.WriteLine(_language["PressAnyKeyToExit"]
-                ?? "Press enter to exit...");
+            Console.WriteLine(_language["PressAnyKeyToExit"]);
             Console.ReadLine();
             Environment.Exit(0);
         }
         
         Console.ForegroundColor = ConsoleColor.Green;
-        Console.WriteLine(_language["ArcBrowserIsRunning"]
-            ?? "Arc Browser is running.");
+        Console.WriteLine(_language["ArcBrowserIsRunning"]);
         Console.ResetColor();
         
         var cts = new CancellationTokenSource();
@@ -106,46 +98,25 @@ public class Bootstrapper
         var client = new GitHubClient(new ProductHeaderValue(ProgramName));
         var releases = await client.Repository.Release.GetAll("kataloved", ProgramName);
         if (!releases.Any()) return;
-        
+
         var latestRelease = releases.First();
         var latestVersion = latestRelease.TagName;
         if (latestVersion == Version) return;
-        
-        Console.ForegroundColor = ConsoleColor.Green;
+
         var lines = new[]
         {
-            _language["NewVersionAvailable1"]?.Replace("{{LATEST_VERSION}}", latestVersion).Replace("{{VERSION}}", Version)
-                ?? $"New version available: {latestVersion}. Current version: {Version}",
-            _language["NewVersionAvailable2"]
-                ?? "Correct operation of the program is not guaranteed.",
-            _language["NewVersionAvailable3"]?.Replace("{{URL}}", latestRelease.HtmlUrl)
-                ?? $"You can download it from: {latestRelease.HtmlUrl}",
+            _language["NewVersionAvailable1"]?.Replace("{{LATEST_VERSION}}", latestVersion).Replace("{{VERSION}}", Version),
+            _language["NewVersionAvailable2"],
+            _language["NewVersionAvailable3"]?.Replace("{{URL}}", latestRelease.HtmlUrl),
             _language["NewVersionAvailable4"]
-                ?? "Press enter if you want to continue..."
         };
         
+        Console.ForegroundColor = ConsoleColor.Green;
         foreach (var line in lines) Console.WriteLine(line);
         Console.ResetColor();
         
         var pressedKey = Console.ReadKey().Key;
         if (pressedKey != ConsoleKey.Enter) Environment.Exit(0);
-    }
-    
-    private static Dictionary<string, string> LoadLanguage(string languageKey)
-    {
-        var languagePath = $@"languages\{languageKey}.ini";
-        var language = new Dictionary<string, string>();
-        if (!File.Exists(languagePath)) return language;
-        
-        var lines = File.ReadAllLines(languagePath);
-        return lines
-            .Select(line => line.Split('='))
-            .Where(parts => parts.Length == 2)
-            .Aggregate(language, (current, parts) =>
-            {
-                current.Add(parts[0], parts[1]);
-                return current;
-            });
     }
 
     private static Dictionary<string, string> GetArcBrowserFolderPaths()
@@ -255,6 +226,36 @@ public class Bootstrapper
         
         _arcStartWatcher.Stop();
         Environment.Exit(0);
+    }
+    
+    private static Dictionary<string, string> LoadLanguage(string languageKey)
+    {
+        var languagePath = $@"languages\{languageKey}.ini";
+        var language = new Dictionary<string, string>
+        {
+            { "ArcBrowserNotFound", "Arc Browser not found." },
+            { "PressAnyKeyToExit", "Press any key to exit..." },
+            { "FailedToFixArcBrowser", "Failed to fix Arc Browser." },
+            { "TryingToRunArcBrowser", "Trying to run Arc Browser..." },
+            { "FailedToRunArcBrowser", "Failed to run Arc Browser." },
+            { "ArcBrowserIsRunning", "Arc Browser is running." },
+            { "NewVersionAvailable1", "New version available: {{LATEST_VERSION}}. Current version: {{VERSION}}" },
+            { "NewVersionAvailable2", "Correct operation of the program is not guaranteed." },
+            { "NewVersionAvailable3", "You can download it from: {{URL}}" },
+            { "NewVersionAvailable4", "Press enter if you want to continue..." }
+        };
+        
+        if (!File.Exists(languagePath)) return language;
+        
+        var lines = File.ReadAllLines(languagePath);
+        return lines
+            .Select(line => line.Split('='))
+            .Where(parts => parts.Length == 2)
+            .Aggregate(language, (current, parts) =>
+            {
+                current[parts[0]] = parts[1];
+                return current;
+            });
     }
 
     private const string Version = "1.0.2";
